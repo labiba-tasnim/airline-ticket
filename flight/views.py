@@ -233,7 +233,51 @@ def flight(request):
         })
 
 def review(request):
-    raise NotImplementedError("Not implemented")
+    flight_1 = request.GET.get('flight1Id')
+    date1 = request.GET.get('flight1Date')
+    seat = request.GET.get('seatClass')
+    round_trip = False
+    if request.GET.get('flight2Id'):
+        round_trip = True
+
+    if round_trip:
+        flight_2 = request.GET.get('flight2Id')
+        date2 = request.GET.get('flight2Date')
+
+    if request.user.is_authenticated:
+        flight1 = Flight.objects.get(id=flight_1)
+        flight1ddate = datetime(int(date1.split('-')[2]),int(date1.split('-')[1]),int(date1.split('-')[0]),flight1.depart_time.hour,flight1.depart_time.minute)
+        flight1adate = (flight1ddate + flight1.duration)
+        flight2 = None
+        flight2ddate = None
+        flight2adate = None
+        if round_trip:
+            flight2 = Flight.objects.get(id=flight_2)
+            flight2ddate = datetime(int(date2.split('-')[2]),int(date2.split('-')[1]),int(date2.split('-')[0]),flight2.depart_time.hour,flight2.depart_time.minute)
+            flight2adate = (flight2ddate + flight2.duration)
+        #print("//////////////////////////////////")
+        #print(f"flight1ddate: {flight1adate-flight1ddate}")
+        #print("//////////////////////////////////")
+        if round_trip:
+            return render(request, "flight/book.html", {
+                'flight1': flight1,
+                'flight2': flight2,
+                "flight1ddate": flight1ddate,
+                "flight1adate": flight1adate,
+                "flight2ddate": flight2ddate,
+                "flight2adate": flight2adate,
+                "seat": seat,
+                "fee": FEE
+            })
+        return render(request, "flight/book.html", {
+            'flight1': flight1,
+            "flight1ddate": flight1ddate,
+            "flight1adate": flight1adate,
+            "seat": seat,
+            "fee": FEE
+        })
+    else:
+        return HttpResponseRedirect(reverse("login"))
 
 def book(request):
     raise NotImplementedError("Not implemented")
